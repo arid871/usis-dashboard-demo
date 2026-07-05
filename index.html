@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Sentinel Ops Console</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+  :root{
+    --ink:#0F1A2E;
+    --panel:#16233D;
+    --panel-2:#1C2C4A;
+    --line:#2A3B5C;
+    --paper:#E7ECF5;
+    --mist:#8EA0C0;
+    --amber:#F2A93B;
+    --teal:#2FD9C4;
+    --red:#F0596B;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:radial-gradient(1200px 700px at 15% -10%, #1B2C4E 0%, var(--ink) 55%);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    padding:40px;
+    min-height:100vh;
+  }
+  .wrap{max-width:1180px;margin:0 auto;}
+
+  /* Header */
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:flex-end;
+    margin-bottom:28px;
+    border-bottom:1px solid var(--line);
+    padding-bottom:20px;
+  }
+  .brand{display:flex;align-items:center;gap:12px;}
+  .brand-mark{
+    width:34px;height:34px;border-radius:8px;
+    background:conic-gradient(from 220deg, var(--teal), var(--amber), var(--teal));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'IBM Plex Mono',monospace;font-weight:700;font-size:14px;color:var(--ink);
+  }
+  .brand h1{font-size:19px;margin:0;letter-spacing:0.2px;}
+  .brand span{display:block;font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--mist);letter-spacing:1.5px;text-transform:uppercase;margin-top:2px;}
+  .clock{font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--mist);text-align:right;}
+  .clock b{color:var(--teal);font-size:13px;}
+
+  /* KPI row */
+  .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+  .kpi{
+    background:linear-gradient(180deg,var(--panel),var(--panel-2));
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:16px 18px;
+    position:relative;
+    overflow:hidden;
+  }
+  .kpi::before{
+    content:"";position:absolute;top:0;left:0;width:3px;height:100%;
+  }
+  .kpi.good::before{background:var(--teal);}
+  .kpi.warn::before{background:var(--amber);}
+  .kpi.crit::before{background:var(--red);}
+  .kpi.neutral::before{background:var(--mist);}
+  .kpi .label{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:1.2px;text-transform:uppercase;color:var(--mist);}
+  .kpi .value{font-family:'IBM Plex Mono',monospace;font-size:30px;font-weight:600;margin-top:6px;}
+  .kpi .delta{font-size:11.5px;margin-top:6px;color:var(--mist);}
+  .kpi .delta.up{color:var(--teal);}
+  .kpi .delta.down{color:var(--red);}
+
+  /* Main grid */
+  .grid{display:grid;grid-template-columns:1.35fr 1fr;gap:16px;}
+  .card{
+    background:var(--panel);
+    border:1px solid var(--line);
+    border-radius:10px;
+    padding:18px 20px;
+  }
+  .card h2{
+    font-size:13px;margin:0 0 14px 0;font-weight:600;
+    display:flex;align-items:center;justify-content:space-between;
+  }
+  .card h2 small{font-family:'IBM Plex Mono',monospace;font-weight:400;color:var(--mist);font-size:11px;}
+
+  /* Tickets table */
+  table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  th{
+    text-align:left;font-family:'IBM Plex Mono',monospace;font-size:10px;
+    color:var(--mist);text-transform:uppercase;letter-spacing:1px;
+    padding:6px 8px;border-bottom:1px solid var(--line);
+  }
+  td{padding:9px 8px;border-bottom:1px solid rgba(255,255,255,0.04);}
+  .pill{
+    display:inline-block;padding:2px 8px;border-radius:20px;
+    font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:0.4px;
+  }
+  .pill.open{background:rgba(240,89,107,0.15);color:var(--red);}
+  .pill.progress{background:rgba(242,169,59,0.15);color:var(--amber);}
+  .pill.scheduled{background:rgba(142,160,192,0.15);color:var(--mist);}
+  .priority{width:6px;height:6px;border-radius:50%;display:inline-block;margin-right:7px;}
+  .p-high{background:var(--red);}
+  .p-med{background:var(--amber);}
+  .p-low{background:var(--teal);}
+
+  /* Site wall */
+  .site-wall{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;}
+  .site{
+    border:1px solid var(--line);border-radius:8px;padding:11px 12px;
+    background:var(--panel-2);position:relative;
+  }
+  .site .name{font-size:12px;font-weight:600;margin-bottom:3px;}
+  .site .sub{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--mist);}
+  .dot{width:8px;height:8px;border-radius:50%;position:absolute;top:12px;right:12px;}
+  .dot.on{background:var(--teal);box-shadow:0 0 0 3px rgba(47,217,196,0.18);}
+  .dot.deg{background:var(--amber);box-shadow:0 0 0 3px rgba(242,169,59,0.18);}
+  .dot.off{background:var(--red);box-shadow:0 0 0 3px rgba(240,89,107,0.18);}
+  .dot.pulse{animation:pulse 2s infinite;}
+  @keyframes pulse{0%{transform:scale(1);}50%{transform:scale(1.5);}100%{transform:scale(1);}}
+
+  /* Trend chart */
+  .chart{margin-top:16px;}
+  .bars{display:flex;align-items:flex-end;gap:8px;height:90px;}
+  .bar{flex:1;background:linear-gradient(180deg,var(--teal),rgba(47,217,196,0.15));border-radius:4px 4px 0 0;position:relative;}
+  .bar span{position:absolute;bottom:-18px;left:0;right:0;text-align:center;font-family:'IBM Plex Mono',monospace;font-size:9px;color:var(--mist);}
+
+  footer{margin-top:22px;font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--mist);text-align:center;letter-spacing:0.6px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="brand">
+      <div class="brand-mark">SO</div>
+      <div>
+        <h1>Sentinel Ops Console</h1>
+        <span>Field Service &amp; Systems Monitoring</span>
+      </div>
+    </div>
+    <div class="clock">LAST SYNC <b>08:41 EST</b><br>3 sites reporting degraded status</div>
+  </header>
+
+  <div class="kpis">
+    <div class="kpi crit">
+      <div class="label">Open Tickets</div>
+      <div class="value">14</div>
+      <div class="delta down">▲ 4 vs. yesterday</div>
+    </div>
+    <div class="kpi warn">
+      <div class="label">Avg. First Response</div>
+      <div class="value">22m</div>
+      <div class="delta up">▼ 6m improved</div>
+    </div>
+    <div class="kpi good">
+      <div class="label">Camera / NVR Uptime</div>
+      <div class="value">98.6%</div>
+      <div class="delta up">▲ 0.4% this week</div>
+    </div>
+    <div class="kpi neutral">
+      <div class="label">SLA Compliance</div>
+      <div class="value">91%</div>
+      <div class="delta down">▼ 3% this month</div>
+    </div>
+  </div>
+
+  <div class="grid">
+    <div class="card">
+      <h2>Active Tickets <small>14 open · sorted by priority</small></h2>
+      <table>
+        <tr><th>Priority</th><th>Site</th><th>Issue</th><th>Status</th><th>Assigned</th></tr>
+        <tr><td><span class="priority p-high"></span>High</td><td>Lexington Ave</td><td>MorphoManager – intermittent no-user query</td><td><span class="pill open">Open</span></td><td>J. Ruiz</td></tr>
+        <tr><td><span class="priority p-high"></span>High</td><td>10.80.101.246</td><td>CompleteView – cameras unreachable</td><td><span class="pill progress">In Progress</span></td><td>A. Chen</td></tr>
+        <tr><td><span class="priority p-med"></span>Medium</td><td>FHLBNY</td><td>S2 – NAS not accessible</td><td><span class="pill scheduled">Scheduled</span></td><td>D. Park</td></tr>
+        <tr><td><span class="priority p-med"></span>Medium</td><td>Two Towers</td><td>Elevator access – HID/Bluetooth prompt</td><td><span class="pill progress">In Progress</span></td><td>M. Alvarez</td></tr>
+        <tr><td><span class="priority p-low"></span>Low</td><td>Estimating</td><td>Panic button backorder – alt. part needed</td><td><span class="pill open">Open</span></td><td>Unassigned</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Site Status Wall <small>12 monitored</small></h2>
+      <div class="site-wall">
+        <div class="site"><div class="dot on pulse"></div><div class="name">Lexington Ave</div><div class="sub">MorphoManager</div></div>
+        <div class="site"><div class="dot deg pulse"></div><div class="name">Harbor Plaza</div><div class="sub">CompleteView 7</div></div>
+        <div class="site"><div class="dot on pulse"></div><div class="name">FHLBNY</div><div class="sub">S2 Access</div></div>
+        <div class="site"><div class="dot off pulse"></div><div class="name">Two Towers</div><div class="sub">HID Mobile</div></div>
+        <div class="site"><div class="dot on pulse"></div><div class="name">Meridian Sq.</div><div class="sub">S2 Access</div></div>
+        <div class="site"><div class="dot deg pulse"></div><div class="name">Concierge Desk</div><div class="sub">Camera Feed</div></div>
+      </div>
+
+      <div class="chart">
+        <h2 style="margin-top:18px;">Tickets Resolved <small>last 7 days</small></h2>
+        <div class="bars">
+          <div class="bar" style="height:40%"><span>M</span></div>
+          <div class="bar" style="height:65%"><span>T</span></div>
+          <div class="bar" style="height:50%"><span>W</span></div>
+          <div class="bar" style="height:80%"><span>T</span></div>
+          <div class="bar" style="height:55%"><span>F</span></div>
+          <div class="bar" style="height:30%"><span>S</span></div>
+          <div class="bar" style="height:20%"><span>S</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>SENTINEL OPS CONSOLE — SAMPLE UX/KPI DASHBOARD CONCEPT — DESIGNED BY M. ARID</footer>
+</div>
+</body>
+</html>
