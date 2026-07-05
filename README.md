@@ -2,7 +2,7 @@
 
 A sample operations dashboard designed to demonstrate UX and data visualization thinking for a field service / systems monitoring context — access control, cameras/NVR, and ticket management.
 
-**[View live demo →](https://arid871.github.io/usis-dashboard-demo/)**
+**[View live demo →](https://mustakimarid.com/usis-dashboard-demo/)**
 
 ## What this is
 
